@@ -1,8 +1,8 @@
 # Value Investing Stock Screen
 
-A quantitative value-investing screener built from a written thesis (see `Thesis.pdf`). AI-leveraged code, hand-written strategy.
+A quantitative value-investing screener built from a written thesis (see `Thesis.pdf`) by me and leveraging Ai to assist with code.
 
-Informational & educational purposes only. Nothing here is a recommendation, offer, or solicitation to buy, sell, or hold any security.
+## Informational & educational purposes only. Nothing here is a recommendation, offer, or solicitation to buy, sell, or hold any security.
 
 # Functionality
 
@@ -51,3 +51,38 @@ Every run posts one message to Discord (and saves the same result to `state/late
 **Strongest businesses** - the top 5 by F-Score alone, regardless of valuation.
 
 **Excluded** - every watchlist ticker that didn't make it through, with a one line reason (stale filing, failed solvency check, not an operating company, etc.).
+
+
+
+# Layout
+- Disclaimer Ai wrote this portion of the codebase.
+
+run_screen.py - entry point, runs the full screen for every symbol in watchlist.json
+
+config.py - every threshold from the thesis in one place
+
+screen/fundamentals.py - pulls financials from SEC EDGAR
+
+screen/classification.py - sector/industry from SIC codes, S&P 500 peer list, operating-company check
+
+screen/market_data.py - prices and technicals from Alpaca
+
+screen/news.py - headlines + Claude sentiment
+
+screen/estimates.py - consensus EPS snapshots for the Earnings Revision Score
+
+screen/scores.py - F-Score and V-Score
+
+screen/peer_ranking.py - percentile ranking against S&P 500 peers
+
+screen/composite.py - the weighted 10-point score
+
+## Informational & educational purposes only. Nothing here is a recommendation, offer, or solicitation to buy, sell, or hold any security.
+
+screen/financials_screen.py - separate scoring path for the Financials sector
+
+screen/gate.py - qualify / contenders / strongest businesses logic
+
+screen/report.py - formats and saves the daily output
+
+state/ — daily run history, committed back by the GitHub Action
