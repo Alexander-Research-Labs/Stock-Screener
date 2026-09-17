@@ -154,7 +154,7 @@ def screen_one(symbol, prior_eligible, sp500_metrics_df):
         })
         return result, None
 
-    interest_ok = curr["interest_coverage"] is not None and curr["interest_coverage"] > config.INTEREST_COVERAGE_MIN
+    interest_ok = curr["interest_coverage"] is None or curr["interest_coverage"] > config.INTEREST_COVERAGE_MIN
     quick_ok = curr["quick_ratio"] is not None and curr["quick_ratio"] > config.QUICK_RATIO_MIN
     if not (interest_ok and quick_ok):
         return None, {"symbol": symbol, "reason": "failed solvency/liquidity safety screen"}
