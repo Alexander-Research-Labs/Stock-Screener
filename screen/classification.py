@@ -98,6 +98,10 @@ def classify_from_submissions(submissions_json):
     return sector, sic_industry
 
 
+def is_operating_company(submissions_json):
+    return submissions_json.get("entityType") == "operating"
+
+
 _sp500_cache = None
 
 

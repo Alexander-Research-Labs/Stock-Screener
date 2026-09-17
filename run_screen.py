@@ -11,6 +11,14 @@ def build_sp500_metrics():
     rows = []
     for _, row in sp500.iterrows():
         try:
+            submissions = fundamentals.fetch_submissions(row["cik"])
+        except Exception:
+            continue
+        if not classification.is_operating_company(submissions):
+            continue
+        gics_sector, sic_industry = classification.classify_from_submissions(submissions)
+
+        try:
             facts = fundamentals.fetch_company_facts(row["cik"])
         except Exception:
             continue
@@ -35,8 +43,8 @@ def build_sp500_metrics():
 
         rows.append({
             "symbol": row["symbol"],
-            "gics_sector": row["gics_sector"],
-            "gics_sub_industry": row["gics_sub_industry"],
+            "gics_sector": gics_sector,
+            "sic_industry": sic_industry,
             "profitability_gp": curr["profitability_gp"],
             "profitability_ebit": curr["profitability_ebit"],
             "roa": curr["roa"],
@@ -58,6 +66,8 @@ def screen_one(symbol, prior_eligible, sp500_metrics_df):
         return None, {"symbol": symbol, "type": "unknown", "reason": "no SEC CIK match — not an operating-company equity filer, or unlisted"}
 
     submissions = fundamentals.fetch_submissions(cik)
+    if not classification.is_operating_company(submissions):
+        return None, {"symbol": symbol, "type": "non_equity", "reason": "SEC entityType is not 'operating' — likely an ETF, trust, or fund rather than a common-stock operating company"}
     gics_sector, sic_industry = classification.classify_from_submissions(submissions)
 
     facts = fundamentals.fetch_company_facts(cik)

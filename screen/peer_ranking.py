@@ -16,7 +16,7 @@ def peer_group_for(symbol, sic_industry_desc, gics_sector, sp500_metrics_df):
     if sic_industry_desc:
         sub = sp500_metrics_df[
             (sp500_metrics_df["symbol"] != symbol)
-            & (sp500_metrics_df["gics_sub_industry"] == sic_industry_desc)
+            & (sp500_metrics_df["sic_industry"] == sic_industry_desc)
         ]
         if len(sub) >= config.MIN_PEER_GROUP_SIZE:
             return sub, "sub_industry"
