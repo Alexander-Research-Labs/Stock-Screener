@@ -31,3 +31,19 @@ Google News - recent headlines per stock
 Claude - rates the headlines 1–9 for the News Sentiment score
 
 Financial Modeling Prep - consensus EPS estimates, snapshotted over time to compute the Earnings Revision Score.
+
+# Known Flaws
+
+No backtest (No point for a bot that shows contenders that day; Also introduced survivorship bias from peer universe.
+
+SEC SIC codes instead of GICS sub-industry so it's less organized. 
+
+Earnings Revision Score needs a Financial Modeling Prep ~90 days of accumulated runs before it produces a real value once key gets added.
+
+# Output
+
+Every run posts one message to Discord (and saves the same result to `state/latest_run.json`):
+**Contenders** - tickers that cleared both the F-Score gate and the V-Score discount bar, ranked by composite score.
+**No contenders** — if nothing cleared the bar, the top contenders and their scores aren't posted.
+**Strongest businesses** — the top 5 by F-Score alone, regardless of valuation.
+**Excluded** - every watchlist ticker that didn't make it through, with a one line reason (stale filing, failed solvency check, not an operating company, etc.).
