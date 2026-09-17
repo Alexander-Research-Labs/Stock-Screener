@@ -4,6 +4,7 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5")
 SEC_USER_AGENT = os.getenv("SEC_USER_AGENT", "Alexander Research Labs contact@alexanderresearchlabs.com")
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")
+FMP_API_KEY = os.getenv("FMP_API_KEY", "")
 
 MICRO_CAP_FLOOR = 300_000_000
 PULLBACK_ENTRY_PCT = 0.02
@@ -48,3 +49,4 @@ V_SCORE_CHECKS = {
 WATCHLIST_PATH = "watchlist.json"
 PRIOR_RUN_PATH = "state/prior_run.json"
 OUTPUT_PATH = "state/latest_run.json"
+EPS_SNAPSHOT_PATH = "state/eps_estimates.json"

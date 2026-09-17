@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 
 import config
-from screen import classification, composite, fundamentals, gate, market_data, news, peer_ranking, report, scores, universe
+from screen import classification, composite, estimates, fundamentals, gate, market_data, news, peer_ranking, report, scores, universe
 
 
 def build_sp500_metrics():
@@ -118,6 +118,7 @@ def screen_one(symbol, prior_eligible, sp500_metrics_df):
     )
 
     sentiment = news.sentiment_score(symbol)
+    earnings_revision = estimates.earnings_revision_pct(symbol)
 
     if gics_sector == classification.FINANCIALS_GICS_SECTOR:
         from screen.financials_screen import score_financial
@@ -136,7 +137,7 @@ def screen_one(symbol, prior_eligible, sp500_metrics_df):
             return None, {"symbol": symbol, "reason": (result or {}).get("reason", "ineligible financial")}
         v, v_checks = scores.v_score(
             ev_ebit_now, ev_ebit_3yr_median, fcf_yield, fcf_yield_own_median,
-            profitability, revenue_growth_stdev, None, pullback_pct,
+            profitability, revenue_growth_stdev, earnings_revision, pullback_pct,
             technical.get("stochastic_rsi"), sentiment,
         )
 
@@ -172,7 +173,7 @@ def screen_one(symbol, prior_eligible, sp500_metrics_df):
     f, f_checks = scores.f_score(derived)
     v, v_checks = scores.v_score(
         ev_ebit_now, ev_ebit_3yr_median, fcf_yield, fcf_yield_own_median,
-        profitability, revenue_growth_stdev, None, pullback_pct,
+        profitability, revenue_growth_stdev, earnings_revision, pullback_pct,
         technical.get("stochastic_rsi"), sentiment,
     )
 
