@@ -55,7 +55,8 @@ Every run posts one message to Discord (and saves the same result to `state/late
 
 
 # Layout
-- Disclaimer Ai wrote this portion of the codebase.
+
+Disclaimer Ai wrote this portion of the codebase.
 
 run_screen.py - entry point, runs the full screen for every symbol in watchlist.json
 
