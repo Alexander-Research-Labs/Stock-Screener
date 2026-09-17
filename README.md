@@ -21,8 +21,13 @@ python run_screen.py
 # Data
 
 SEC EDGAR - financial statements
+
 Wikipedia - S&P 500 constituent list
+
 Alpaca - daily price bars for SMA/EMA/MACD/Stochastic RSI, market cap, EV, and the 26-week pullback filter | Broker
+
 Google News - recent headlines per stock
+
 Claude - rates the headlines 1–9 for the News Sentiment score
+
 Financial Modeling Prep - consensus EPS estimates, snapshotted over time to compute the Earnings Revision Score.
