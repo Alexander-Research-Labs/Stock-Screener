@@ -127,6 +127,21 @@ def max_drawdown_1y(df):
     return float(drawdown.min())
 
 
+def momentum_score_pct(sma_50, sma_200, ema_9, ema_21, macd_line, macd_signal, stoch_rsi):
+    parts = []
+    if sma_50 is not None and sma_200 is not None:
+        parts.append(100.0 if sma_50 > sma_200 else 0.0)
+    if ema_9 is not None and ema_21 is not None:
+        parts.append(100.0 if ema_9 > ema_21 else 0.0)
+    if macd_line is not None and macd_signal is not None:
+        parts.append(100.0 if macd_line > macd_signal else 0.0)
+    if stoch_rsi is not None:
+        parts.append(stoch_rsi * 100.0)
+    if not parts:
+        return None
+    return sum(parts) / len(parts)
+
+
 def technical_snapshot(symbol):
     df = daily_bars(symbol)
     if df.empty or len(df) < 30:

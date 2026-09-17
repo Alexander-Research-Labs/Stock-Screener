@@ -19,6 +19,20 @@ def build_sp500_metrics():
             continue
         derived = scores.compute_derived_metrics(hist)
         curr = derived[-1]
+
+        price = None
+        try:
+            price = market_data.latest_trade_price(row["symbol"])
+        except Exception:
+            pass
+
+        market_cap = price * curr["diluted_shares"] if (price and curr["diluted_shares"]) else None
+        cash = (hist["values"]["cashAndEquivalents"][-1] or 0)
+        ev = (market_cap + (curr["total_debt"] or 0) - cash) if market_cap is not None else None
+        ev_ebit = (ev / curr["ebit"]) if (ev is not None and curr["ebit"]) else None
+        fcf_yield = (curr["fcf"] / market_cap) if (curr["fcf"] is not None and market_cap) else None
+        revenue_growth_stdev = peer_ranking.stdev_of([d["revenue_growth"] for d in derived if d["revenue_growth"] is not None])
+
         rows.append({
             "symbol": row["symbol"],
             "gics_sector": row["gics_sector"],
@@ -26,6 +40,14 @@ def build_sp500_metrics():
             "profitability_gp": curr["profitability_gp"],
             "profitability_ebit": curr["profitability_ebit"],
             "roa": curr["roa"],
+            "roe": (curr["net_income"] / curr["equity"]) if (curr["net_income"] is not None and curr["equity"]) else None,
+            "ev_ebit": ev_ebit,
+            "fcf_yield": fcf_yield,
+            "revenue_growth_stdev": revenue_growth_stdev,
+            "pb": (price / (curr["equity"] / curr["diluted_shares"])) if (price and curr["equity"] is not None and curr["diluted_shares"]) else None,
+            "pe": (price / (curr["net_income"] / curr["diluted_shares"])) if (
+                price and curr["net_income"] is not None and curr["net_income"] > 0 and curr["diluted_shares"]
+            ) else None,
         })
     return pd.DataFrame(rows)
 
@@ -90,7 +112,16 @@ def screen_one(symbol, prior_eligible, sp500_metrics_df):
     if gics_sector == classification.FINANCIALS_GICS_SECTOR:
         from screen.financials_screen import score_financial
         book_value_per_share = (curr["equity"] / curr["diluted_shares"]) if (curr["equity"] is not None and curr["diluted_shares"]) else None
-        result = score_financial(symbol, derived, technical["price"], book_value_per_share, technical, sentiment, None, None, None, None)
+        pb_now = (technical["price"] / book_value_per_share) if (technical.get("price") and book_value_per_share) else None
+        pe_now = (technical["price"] / (curr["net_income"] / curr["diluted_shares"])) if (
+            technical.get("price") and curr["net_income"] is not None and curr["net_income"] > 0 and curr["diluted_shares"]
+        ) else None
+        roe_now = (curr["net_income"] / curr["equity"]) if (curr["net_income"] is not None and curr["equity"]) else None
+        peer_pb, _ = peer_ranking.rank_against_peers(symbol, "pb", pb_now, sic_industry, gics_sector, sp500_metrics_df)
+        peer_pe, _ = peer_ranking.rank_against_peers(symbol, "pe", pe_now, sic_industry, gics_sector, sp500_metrics_df)
+        peer_roe, _ = peer_ranking.rank_against_peers(symbol, "roe", roe_now, sic_industry, gics_sector, sp500_metrics_df)
+        peer_roa, _ = peer_ranking.rank_against_peers(symbol, "roa", curr["roa"], sic_industry, gics_sector, sp500_metrics_df)
+        result = score_financial(symbol, derived, technical["price"], book_value_per_share, technical, sentiment, peer_pb, peer_pe, peer_roe, peer_roa)
         if result is None or not result.get("eligible"):
             return None, {"symbol": symbol, "reason": (result or {}).get("reason", "ineligible financial")}
         v, v_checks = scores.v_score(
@@ -98,7 +129,29 @@ def screen_one(symbol, prior_eligible, sp500_metrics_df):
             profitability, revenue_growth_stdev, None, pullback_pct,
             technical.get("stochastic_rsi"), sentiment,
         )
-        result.update({"v_score": v, "v_checks": v_checks, "screen": "financials"})
+
+        pb_pct = (100 - peer_pb) if peer_pb is not None else None
+        pe_pct = (100 - peer_pe) if peer_pe is not None else None
+        fin_valuation_parts = [p for p in [pb_pct, pe_pct] if p is not None]
+        fin_valuation_pct = sum(fin_valuation_parts) / len(fin_valuation_parts) if fin_valuation_parts else None
+        fin_fundamentals_parts = [p for p in [peer_roe, peer_roa] if p is not None]
+        fin_fundamentals_pct = sum(fin_fundamentals_parts) / len(fin_fundamentals_parts) if fin_fundamentals_parts else None
+        fin_risk_pct = ((sentiment / 9) * 100) if sentiment is not None else None
+        fin_momentum_pct = market_data.momentum_score_pct(
+            technical.get("sma_50"), technical.get("sma_200"),
+            technical.get("ema_9"), technical.get("ema_21"),
+            technical.get("macd_line"), technical.get("macd_signal"),
+            technical.get("stochastic_rsi"),
+        )
+        fin_composite, fin_breakdown = composite.weighted_composite(
+            fin_fundamentals_pct, fin_valuation_pct, fin_risk_pct, fin_momentum_pct
+        )
+
+        result.update({
+            "v_score": v, "v_checks": v_checks, "screen": "financials",
+            "composite_score": fin_composite, "composite_breakdown": fin_breakdown,
+            "news_sentiment": sentiment,
+        })
         return result, None
 
     interest_ok = curr["interest_coverage"] is not None and curr["interest_coverage"] > config.INTEREST_COVERAGE_MIN
@@ -114,14 +167,27 @@ def screen_one(symbol, prior_eligible, sp500_metrics_df):
     )
 
     profitability_pct, _ = peer_ranking.rank_against_peers(symbol, "profitability_gp", profitability, sic_industry, gics_sector, sp500_metrics_df)
-    valuation_pct = 100 - (ev_ebit_now or 0)
-    momentum_pct = None
-    if technical.get("sma_50") and technical.get("sma_200"):
-        momentum_pct = 100.0 if technical["sma_50"] > technical["sma_200"] else 0.0
+    revenue_stability_pct, _ = peer_ranking.rank_against_peers(symbol, "revenue_growth_stdev", revenue_growth_stdev, sic_industry, gics_sector, sp500_metrics_df)
+    revenue_stability_pct = (100 - revenue_stability_pct) if revenue_stability_pct is not None else None
+    fundamentals_parts = [p for p in [profitability_pct, revenue_stability_pct] if p is not None]
+    fundamentals_pct = sum(fundamentals_parts) / len(fundamentals_parts) if fundamentals_parts else None
+
+    ev_ebit_pct, _ = peer_ranking.rank_against_peers(symbol, "ev_ebit", ev_ebit_now, sic_industry, gics_sector, sp500_metrics_df)
+    ev_ebit_pct = (100 - ev_ebit_pct) if ev_ebit_pct is not None else None
+    fcf_yield_pct, _ = peer_ranking.rank_against_peers(symbol, "fcf_yield", fcf_yield, sic_industry, gics_sector, sp500_metrics_df)
+    valuation_parts = [p for p in [ev_ebit_pct, fcf_yield_pct] if p is not None]
+    valuation_pct = sum(valuation_parts) / len(valuation_parts) if valuation_parts else None
+
+    momentum_pct = market_data.momentum_score_pct(
+        technical.get("sma_50"), technical.get("sma_200"),
+        technical.get("ema_9"), technical.get("ema_21"),
+        technical.get("macd_line"), technical.get("macd_signal"),
+        technical.get("stochastic_rsi"),
+    )
     risk_pct = ((sentiment / 9) * 100) if sentiment is not None else None
 
     composite_score, composite_breakdown = composite.weighted_composite(
-        profitability_pct, None, risk_pct, momentum_pct
+        fundamentals_pct, valuation_pct, risk_pct, momentum_pct
     )
 
     return {
