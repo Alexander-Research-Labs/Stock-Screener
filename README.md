@@ -2,7 +2,7 @@
 
 A quantitative value-investing screener built from a written thesis (see `Thesis.pdf`) by me and leveraging Ai to assist with code.
 
-## Informational & educational purposes only. Nothing here is a recommendation, offer, or solicitation to buy, sell, or hold any security.
+Informational & educational purposes only. Nothing here is a recommendation, offer, or solicitation to buy, sell, or hold any security.
 
 # Functionality
 
@@ -77,8 +77,6 @@ screen/peer_ranking.py - percentile ranking against S&P 500 peers
 
 screen/composite.py - the weighted 10-point score
 
-## Informational & educational purposes only. Nothing here is a recommendation, offer, or solicitation to buy, sell, or hold any security.
-
 screen/financials_screen.py - separate scoring path for the Financials sector
 
 screen/gate.py - qualify / contenders / strongest businesses logic
@@ -86,3 +84,5 @@ screen/gate.py - qualify / contenders / strongest businesses logic
 screen/report.py - formats and saves the daily output
 
 state/ — daily run history, committed back by the GitHub Action
+
+### Informational & educational purposes only. Nothing here is a recommendation, offer, or solicitation to buy, sell, or hold any security.
