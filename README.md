@@ -46,7 +46,7 @@ Every run posts one message to Discord (and saves the same result to `state/late
 
 **Contenders** - tickers that cleared both the F-Score gate and the V-Score discount bar, ranked by composite score.
 
-**No contenders** - if nothing cleared the bar, the top contenders and their scores aren't posted.
+**No contenders** - if nothing cleared the bar, the top contenders and their scores aren't posted; "runner ups" are posted instead.
 
 **Strongest businesses** - the top 5 by F-Score alone, regardless of valuation.
 
