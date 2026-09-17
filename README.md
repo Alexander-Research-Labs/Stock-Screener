@@ -17,3 +17,7 @@ cp .env.example .env
 Fill in `.env`
 
 python run_screen.py
+
+# Data
+
+SEC EDGAR for financials, sector, and entity type. Wikipedia for the S&P 500 peer list. Alpaca for prices and technicals. Google News + Claude for sentiment. Financial Modeling Prep for consensus EPS. All free tier, no Yahoo.
