@@ -46,8 +46,8 @@ Every run posts one message to Discord (and saves the same result to `state/late
 
 **Contenders** - tickers that cleared both the F-Score gate and the V-Score discount bar, ranked by composite score.
 
-**No contenders** — if nothing cleared the bar, the top contenders and their scores aren't posted.
+**No contenders** - if nothing cleared the bar, the top contenders and their scores aren't posted.
 
-**Strongest businesses** — the top 5 by F-Score alone, regardless of valuation.
+**Strongest businesses** - the top 5 by F-Score alone, regardless of valuation.
 
 **Excluded** - every watchlist ticker that didn't make it through, with a one line reason (stale filing, failed solvency check, not an operating company, etc.).
