@@ -1,6 +1,6 @@
 # Value Investing Stock Screen
 
-A quantitative value-investing screener built from a written thesis (see `Thesis.pdf`) by me and leveraging Ai to assist with code.
+A quantitative value-investing screener built from a written thesis by me and leveraging Ai to assist with code.
 
 Informational & educational purposes only. Nothing here is a recommendation, offer, or solicitation to buy, sell, or hold any security.
 
@@ -56,7 +56,7 @@ Every run posts one message to Discord (and saves the same result to `state/late
 
 # Layout
 
-Disclaimer Ai wrote this portion of the codebase.
+Disclaimer: AI wrote this portion of the codebase.
 
 run_screen.py - entry point, runs the full screen for every symbol in watchlist.json
 
