@@ -1,15 +1,10 @@
 # Value Investing Stock Screen
-
-A quantitative value-investing screener built from a written thesis by me and leveraging Ai to assist with code.
-
 Informational & educational purposes only. Nothing here is a recommendation, offer, or solicitation to buy, sell, or hold any security.
-
+# Purpose
+The purpose is to showcase my thesis on value investing that screens stocks in my watchlist daily to find the strongest candidates based on their business quality and their "discount" relative to their own history and their peers. My target audience is mainly my peers, along with anyone else who may be interested in investments. I leveraged AI coding to assist me with implementing my thesis.
 # Functionality
-
 Each day during the week it scans the watchlist. Any stocks that fits the requirements are send to Discord through webhook. Reach thesis to learn more.
-
 # Set Up
-
 pip install -r requirements.txt
 
 cp .env.example .env
